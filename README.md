@@ -19,8 +19,8 @@ cd rainbow_gifs
 
 ```bash
 
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv rainbow_gif_venv
+source rainbow_gif_venv/bin/activate
 
 pip install -r requirements.txt
 ```
