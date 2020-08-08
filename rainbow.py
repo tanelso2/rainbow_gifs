@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from PIL import Image, ImageChops
 import argparse
 import sys
@@ -7,6 +9,8 @@ parser.add_argument("input_file", type=str)
 parser.add_argument("--blend-amount", "-b", type=float, default=0.25)
 parser.add_argument("--hue-rate", "-r", type=int, default=30)
 parser.add_argument("--duration", "-d", type=int, default=60)
+parser.add_argument("--optimize", default=False, action='store_true')
+parser.add_argument("--output-file", default="out/output.gif", type=str)
 args = parser.parse_args()
 
 RGBA_MODE = "RGBA"
@@ -45,16 +49,14 @@ for hue in range(0, 360, args.hue_rate):
 gif_encoder_args = {
     "duration": args.duration,
     "loop": 0,
-    "optimize": False
+    "optimize": args.optimize
 }
 
 transparency_loc = get_transparency_palette_loc(base_image)
 if transparency_loc is not None:
     gif_encoder_args["transparency"] = transparency_loc
 
-output_file = "out/output.gif"
-
-images[0].save(output_file,
+images[0].save(args.output_file,
                save_all=True,
                append_images=images[1:],
                **gif_encoder_args)
