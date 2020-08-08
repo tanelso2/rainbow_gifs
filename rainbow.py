@@ -1,10 +1,18 @@
 from PIL import Image, ImageChops
+import argparse
 import sys
+
+parser = argparse.ArgumentParser()
+parser.add_argument("input_file", type=str)
+parser.add_argument("--blend-amount", "-b", type=float, default=0.25)
+parser.add_argument("--hue-rate", "-r", type=int, default=30)
+parser.add_argument("--duration", "-d", type=int, default=60)
+args = parser.parse_args()
 
 RGBA_MODE = "RGBA"
 PALETTE_MODE = "P"
 
-input_file = sys.argv[1]
+input_file = args.input_file
 
 base_image = Image.open(input_file).convert(RGBA_MODE)
 
@@ -24,10 +32,10 @@ def get_transparency_palette_loc(img):
     return None
 
 
-for hue in range(0, 360, 30):
-    hsv_string = f"hsv({hue},100%,100%)"
+for hue in range(0, 360, args.hue_rate):
+    hsv_string = "hsv({hue},100%,100%)".format(hue=hue)
     im = Image.new(RGBA_MODE, base_image.size, hsv_string)
-    blended = ImageChops.blend(base_image, im, 0.25)
+    blended = ImageChops.blend(base_image, im, args.blend_amount)
     composited = ImageChops.composite(blended, base_image, base_image)
     images.append(composited)
 
@@ -35,7 +43,7 @@ for hue in range(0, 360, 30):
 #import pdb; pdb.set_trace()
 
 gif_encoder_args = {
-    "duration": 60,
+    "duration": args.duration,
     "loop": 0,
     "optimize": False
 }
