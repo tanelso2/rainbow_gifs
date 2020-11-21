@@ -6,16 +6,16 @@ import sys
 
 print("Starting up")
 parser = argparse.ArgumentParser()
-parser.add_argument("input_file", type=str)
-parser.add_argument("--blend-amount", "-b", type=float, default=0.25)
-parser.add_argument("--hue-rate", "-r", type=int, default=30)
-parser.add_argument("--duration", "-d", type=int, default=60)
-parser.add_argument("--optimize", default=False, action='store_true')
-parser.add_argument("--disable-transparency", default=False, action='store_true')
-parser.add_argument("--transparency-sensitivity", "-t", type=int, default=1)
-parser.add_argument("--output-file", default="out/output.gif", type=str)
-parser.add_argument("--pdb", default=False, action='store_true')
-parser.add_argument("--debug", default=False, action='store_true')
+parser.add_argument("input_file", type=str, help='The file to rainbowiefy')
+parser.add_argument("--blend-amount", "-b", type=float, default=0.25, help='How vibrant the colours are')
+parser.add_argument("--hue-rate", "-r", type=int, default=30, help='How fast the colors change')
+parser.add_argument("--duration", "-d", type=int, default=60, help='How long the gif is')
+parser.add_argument("--optimize", default=False, action='store_true', help='Tell the gif encoder to "optimize" it. Not sure what that means')
+parser.add_argument("--disable-transparency", default=False, action='store_true', help='Make the resulting image not have any transparency (not recommended)')
+parser.add_argument("--transparency-sensitivity", "-t", type=int, default=1, help='if alpha < sensitivity, make that pixel transparent')
+parser.add_argument("--output-file", default="out/output.gif", type=str, help='The file to save the gif to')
+parser.add_argument("--pdb", default=False, action='store_true', help='Trips a PDB tracepoint for debugging')
+parser.add_argument("--debug", default=False, action='store_true', help='Print debug messages')
 args = parser.parse_args()
 
 DEBUG = args.debug
@@ -51,7 +51,7 @@ def make_all_transparent_into_same_pallete(img, trans_loc, sensitivity=args.tran
             print(f"DEBUG - alpha is {alpha}")
         width, height = palette_img.size
         x,y = divmod(idx, width)
-        if alpha < sensitivity
+        if alpha < sensitivity:
             palette_img.putpixel((y,x), trans_loc)
     return palette_img.convert(RGBA_MODE)
 
