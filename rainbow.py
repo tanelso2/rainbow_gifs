@@ -12,6 +12,7 @@ parser.add_argument("--hue-rate", "-r", type=int, default=30)
 parser.add_argument("--duration", "-d", type=int, default=60)
 parser.add_argument("--optimize", default=False, action='store_true')
 parser.add_argument("--disable-transparency", default=False, action='store_true')
+parser.add_argument("--transparency-sensitivity", "-t", type=int, default=1)
 parser.add_argument("--output-file", default="out/output.gif", type=str)
 parser.add_argument("--pdb", default=False, action='store_true')
 args = parser.parse_args()
@@ -47,7 +48,7 @@ def make_all_transparent_into_same_pallete(img, trans_loc):
         print(f"DEBUG - alpha is {alpha}")
         width, height = palette_img.size
         x,y = divmod(idx, width)
-        if alpha == 0:
+        if alpha < args.transparency_sensitivity:
             palette_img.putpixel((y,x), trans_loc)
     return palette_img.convert(RGBA_MODE)
 
