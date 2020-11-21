@@ -4,7 +4,6 @@ from PIL import Image, ImageChops
 import argparse
 import sys
 
-print("Starting up")
 parser = argparse.ArgumentParser()
 parser.add_argument("input_file", type=str, help='The file to rainbowiefy')
 parser.add_argument("--blend-amount", "-b", type=float, default=0.25, help='How vibrant the colours are')
@@ -17,8 +16,11 @@ parser.add_argument("--output-file", default="out/output.gif", type=str, help='T
 parser.add_argument("--pdb", default=False, action='store_true', help='Trips a PDB tracepoint for debugging')
 parser.add_argument("--debug", default=False, action='store_true', help='Print debug messages')
 args = parser.parse_args()
+print("Starting up")
 
 DEBUG = args.debug
+if DEBUG:
+    print("DEBUG - Debug mode on")
 RGBA_MODE = "RGBA"
 PALETTE_MODE = "P"
 
@@ -47,8 +49,6 @@ def make_all_transparent_into_same_pallete(img, trans_loc, sensitivity=args.tran
     palette_img = img.convert(PALETTE_MODE)
     for idx, val in enumerate(img.getdata()):
         alpha = val[3]
-        if DEBUG:
-            print(f"DEBUG - alpha is {alpha}")
         width, height = palette_img.size
         x,y = divmod(idx, width)
         if alpha < sensitivity:
@@ -74,7 +74,8 @@ gif_encoder_args = {
 }
 
 transparency_loc = get_transparency_palette_loc(base_image)
-print(f"DEBUG - transparency_loc was {transparency_loc}")
+if DEBUG:
+    print(f"DEBUG - transparency_loc was {transparency_loc}")
 if transparency_loc is not None and not args.disable_transparency:
     images = [make_all_transparent_into_same_pallete(x, transparency_loc) for x in images]
     gif_encoder_args["transparency"] = transparency_loc
