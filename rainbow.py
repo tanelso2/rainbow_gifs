@@ -15,6 +15,8 @@ parser.add_argument("--transparency-sensitivity", "-t", type=int, default=1, hel
 parser.add_argument("--output-file", default="out/output.gif", type=str, help='The file to save the gif to')
 parser.add_argument("--pdb", default=False, action='store_true', help='Trips a PDB tracepoint for debugging')
 parser.add_argument("--debug", default=False, action='store_true', help='Print debug messages')
+parser.add_argument("--frame-speed", default=1.5, type=float)
+parser.add_argument("--disposal", default=2, type=float, help='Honestly not sure what this does')
 args = parser.parse_args()
 print("Starting up")
 
@@ -39,9 +41,10 @@ if base_image.format == 'GIF':
 
 num_frames = len(frames)
 
-for f in frames:
-    print(f.getpixel((0, 0)))
-    print(f.info)
+if DEBUG:
+    for f in frames:
+        print(f.getpixel((0, 0)))
+        print(f.info)
 
 
 def get_transparency_palette_loc(img):
@@ -73,7 +76,7 @@ def colorize_image(image, hue):
     rgba_image = image.convert(RGBA_MODE)
     hsv_string = f"hsv({hue},100%,100%)"
     im = Image.new(RGBA_MODE, rgba_image.size, hsv_string)
-    blended = ImageChops.blend(rgba_image, im, 0.5)
+    blended = ImageChops.blend(rgba_image, im, args.blend_amount)
     composited = ImageChops.composite(blended, rgba_image, rgba_image)
     return composited.convert(PALETTE_MODE)
 
@@ -88,23 +91,17 @@ def get_step_size(num_frames):
 
 
 frame_idx = 0
-for hue in range(0, 360, get_step_size(num_frames)):
-    frame_to_color = frames[frame_idx % num_frames]
-    frame_idx += 1
+for hue in range(0, 360, args.hue_rate):
+    frame_to_color = frames[int(frame_idx) % num_frames]
+    frame_idx += args.frame_speed
     colorized_image = colorize_image(frame_to_color, hue)
     images.append(colorized_image)
 
-print("_+____)___)__)__)_____")
-for f in images:
-    print(f.getpixel((0, 0)))
-    print(f.info)
-
-for hue in range(0, 360, args.hue_rate):
-    hsv_string = "hsv({hue},100%,100%)".format(hue=hue)
-    im = Image.new(RGBA_MODE, base_image.size, hsv_string)
-    blended = ImageChops.blend(rgba_base_image, im, args.blend_amount)
-    composited = ImageChops.composite(blended, rgba_base_image, rgba_base_image)
-    images.append(composited)
+if DEBUG:
+    print("_+____)___)__)__)_____")
+    for f in images:
+        print(f.getpixel((0, 0)))
+        print(f.info)
 
 
 if args.pdb:
@@ -122,14 +119,12 @@ if DEBUG:
 if transparency_loc is not None and not args.disable_transparency:
     images = [make_all_transparent_into_same_pallete(x, transparency_loc) for x in images]
     gif_encoder_args["transparency"] = transparency_loc
-    #gif_encoder_args["background"] = transparency_loc
-    #gif_encoder_args["disposal"] = 2
+    gif_encoder_args["background"] = transparency_loc
+    gif_encoder_args["disposal"] = args.disposal
 
 print(f"INFO - Printing to {args.output_file}")
 images[0].save(args.output_file,
                save_all=True,
                append_images=images[1:],
-               background=22,
-               disposal=2,
                **gif_encoder_args)
 print("Job's done")
