@@ -15,8 +15,10 @@ parser.add_argument("--disable-transparency", default=False, action='store_true'
 parser.add_argument("--transparency-sensitivity", "-t", type=int, default=1)
 parser.add_argument("--output-file", default="out/output.gif", type=str)
 parser.add_argument("--pdb", default=False, action='store_true')
+parser.add_argument("--debug", default=False, action='store_true')
 args = parser.parse_args()
 
+DEBUG = args.debug
 RGBA_MODE = "RGBA"
 PALETTE_MODE = "P"
 
@@ -41,14 +43,15 @@ def get_transparency_palette_loc(img):
     print(f"INFO - none of the pixels were fully transparent")
     return None
 
-def make_all_transparent_into_same_pallete(img, trans_loc):
+def make_all_transparent_into_same_pallete(img, trans_loc, sensitivity=args.transparency_sensitivity):
     palette_img = img.convert(PALETTE_MODE)
     for idx, val in enumerate(img.getdata()):
         alpha = val[3]
-        print(f"DEBUG - alpha is {alpha}")
+        if DEBUG:
+            print(f"DEBUG - alpha is {alpha}")
         width, height = palette_img.size
         x,y = divmod(idx, width)
-        if alpha < args.transparency_sensitivity:
+        if alpha < sensitivity
             palette_img.putpixel((y,x), trans_loc)
     return palette_img.convert(RGBA_MODE)
 
