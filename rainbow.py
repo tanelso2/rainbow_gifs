@@ -4,13 +4,16 @@ from PIL import Image, ImageChops
 import argparse
 import sys
 
+print("Starting up")
 parser = argparse.ArgumentParser()
 parser.add_argument("input_file", type=str)
 parser.add_argument("--blend-amount", "-b", type=float, default=0.25)
 parser.add_argument("--hue-rate", "-r", type=int, default=30)
 parser.add_argument("--duration", "-d", type=int, default=60)
 parser.add_argument("--optimize", default=False, action='store_true')
+parser.add_argument("--disable-transparency", default=False, action='store_true')
 parser.add_argument("--output-file", default="out/output.gif", type=str)
+parser.add_argument("--pdb", default=False, action='store_true')
 args = parser.parse_args()
 
 RGBA_MODE = "RGBA"
@@ -26,6 +29,7 @@ images = []
 def get_transparency_palette_loc(img):
     # Too lazy to do conversions right now. Just pass in the right mode
     if img.mode != RGBA_MODE:
+        print(f"WARN - img mode was not RGBA_MODE. Actual: {img.mode}")
         return None
     paletted_data = img.convert(PALETTE_MODE).getdata()
     for idx, val in enumerate(img.getdata()):
@@ -33,7 +37,19 @@ def get_transparency_palette_loc(img):
         if alpha == 0:
             return paletted_data[idx]
     # If none of the pixels are fully transparent, just give up
+    print(f"INFO - none of the pixels were fully transparent")
     return None
+
+def make_all_transparent_into_same_pallete(img, trans_loc):
+    palette_img = img.convert(PALETTE_MODE)
+    for idx, val in enumerate(img.getdata()):
+        alpha = val[3]
+        print(f"DEBUG - alpha is {alpha}")
+        width, height = palette_img.size
+        x,y = divmod(idx, width)
+        if alpha == 0:
+            palette_img.putpixel((y,x), trans_loc)
+    return palette_img.convert(RGBA_MODE)
 
 
 for hue in range(0, 360, args.hue_rate):
@@ -44,7 +60,8 @@ for hue in range(0, 360, args.hue_rate):
     images.append(composited)
 
 
-#import pdb; pdb.set_trace()
+if args.pdb:
+    import pdb; pdb.set_trace()
 
 gif_encoder_args = {
     "duration": args.duration,
@@ -53,10 +70,14 @@ gif_encoder_args = {
 }
 
 transparency_loc = get_transparency_palette_loc(base_image)
-if transparency_loc is not None:
+print(f"DEBUG - transparency_loc was {transparency_loc}")
+if transparency_loc is not None and not args.disable_transparency:
+    images = [make_all_transparent_into_same_pallete(x, transparency_loc) for x in images]
     gif_encoder_args["transparency"] = transparency_loc
 
+print(f"INFO - Printing to {args.output_file}")
 images[0].save(args.output_file,
                save_all=True,
                append_images=images[1:],
                **gif_encoder_args)
+print("Job's done")
