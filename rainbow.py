@@ -20,31 +20,17 @@ parser.add_argument("--disposal", default=2, type=float, help='Honestly not sure
 args = parser.parse_args()
 print("Starting up")
 
+
+
+
+
+
 DEBUG = args.debug
 if DEBUG:
     print("DEBUG - Debug mode on")
 RGBA_MODE = "RGBA"
 PALETTE_MODE = "P"
 
-input_file = args.input_file
-
-base_image = Image.open(input_file)
-rgba_base_image = base_image.convert(RGBA_MODE)
-
-images = []
-
-#import pdb; pdb.set_trace()
-
-frames = [base_image]
-if base_image.format == 'GIF':
-    frames = [frame.copy() for frame in ImageSequence.Iterator(base_image)]
-
-num_frames = len(frames)
-
-if DEBUG:
-    for f in frames:
-        print(f.getpixel((0, 0)))
-        print(f.info)
 
 
 def get_transparency_palette_loc(img):
@@ -89,42 +75,85 @@ def get_step_size(num_frames):
     total_frames = iterations * num_frames
     return int(360 / total_frames)
 
+def rainbowify(
+        input_file,
+        output_file="out/output.gif",
+        blend_amount=0.25,
+        transparency_sensitivity=1,
+        frame_speed=1.5,
+        disposal=2.0,
+        disable_transparency=False,
+        hue_rate=30,
+        duration=60,
+        optimize=False
+        ):
+    input_file = input_file
 
-frame_idx = 0
-for hue in range(0, 360, args.hue_rate):
-    frame_to_color = frames[int(frame_idx) % num_frames]
-    frame_idx += args.frame_speed
-    colorized_image = colorize_image(frame_to_color, hue)
-    images.append(colorized_image)
+    base_image = Image.open(input_file)
+    rgba_base_image = base_image.convert(RGBA_MODE)
 
-if DEBUG:
-    print("_+____)___)__)__)_____")
-    for f in images:
-        print(f.getpixel((0, 0)))
-        print(f.info)
+    images = []
+
+#import pdb; pdb.set_trace()
+
+    frames = [base_image]
+    if base_image.format == 'GIF':
+        frames = [frame.copy() for frame in ImageSequence.Iterator(base_image)]
+
+    num_frames = len(frames)
+
+    if DEBUG:
+        for f in frames:
+            print(f.getpixel((0, 0)))
+            print(f.info)
+    frame_idx = 0
+    for hue in range(0, 360, hue_rate):
+        frame_to_color = frames[int(frame_idx) % num_frames]
+        frame_idx += frame_speed
+        colorized_image = colorize_image(frame_to_color, hue)
+        images.append(colorized_image)
+
+    if DEBUG:
+        print("_+____)___)__)__)_____")
+        for f in images:
+            print(f.getpixel((0, 0)))
+            print(f.info)
 
 
-if args.pdb:
-    import pdb; pdb.set_trace()
+    gif_encoder_args = {
+        "duration": duration,
+        "loop": 0,
+        "optimize": optimize
+    }
 
-gif_encoder_args = {
-    "duration": args.duration,
-    "loop": 0,
-    "optimize": args.optimize
-}
+    transparency_loc = get_transparency_palette_loc(rgba_base_image)
+    if DEBUG:
+        print(f"DEBUG - transparency_loc was {transparency_loc}")
+    if transparency_loc is not None and not disable_transparency:
+        images = [make_all_transparent_into_same_pallete(x, transparency_loc) for x in images]
+        gif_encoder_args["transparency"] = transparency_loc
+        gif_encoder_args["background"] = transparency_loc
+        gif_encoder_args["disposal"] = disposal
 
-transparency_loc = get_transparency_palette_loc(rgba_base_image)
-if DEBUG:
-    print(f"DEBUG - transparency_loc was {transparency_loc}")
-if transparency_loc is not None and not args.disable_transparency:
-    images = [make_all_transparent_into_same_pallete(x, transparency_loc) for x in images]
-    gif_encoder_args["transparency"] = transparency_loc
-    gif_encoder_args["background"] = transparency_loc
-    gif_encoder_args["disposal"] = args.disposal
+    print(f"INFO - Printing to {output_file}")
+    images[0].save(output_file,
+                   save_all=True,
+                   append_images=images[1:],
+                   **gif_encoder_args)
+    print("Job's done")
 
-print(f"INFO - Printing to {args.output_file}")
-images[0].save(args.output_file,
-               save_all=True,
-               append_images=images[1:],
-               **gif_encoder_args)
-print("Job's done")
+def main(args):
+    rainbowify(
+            input_file=args.input_file,
+            output_file=args.output_file,
+            blend_amount=args.blend_amount,
+            transparency_sensitivity=args.transparency_sensitivity,
+            frame_speed=args.frame_speed,
+            disposal=args.disposal,
+            disable_transparency=args.disable_transparency,
+            hue_rate=args.hue_rate,
+            duration=args.duration,
+            optimize=args.optimize
+
+if __name__ == '__main__':
+    main(args)
