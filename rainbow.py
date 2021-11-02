@@ -87,7 +87,6 @@ def rainbowify(
         duration=60,
         optimize=False
         ):
-    input_file = input_file
 
     base_image = Image.open(input_file)
     rgba_base_image = base_image.convert(RGBA_MODE)
