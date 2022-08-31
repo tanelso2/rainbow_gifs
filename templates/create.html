@@ -4,8 +4,9 @@
     <h1>{% block title %} Create a new rainbow gif {% endblock %}</h1>
     <form method="post" enctype="multipart/form-data">
         {% for x in params %}
-        <label for="{{x.name}}">{{x.name}}</label>
-        <input type="range"
+        <label for="{{x.name}}" class="form-label">{{x.name}}</label>
+        <input class="form-control mb-3"
+               type="range"
                id="{{x.name}}"
                name="{{x.name}}"
                min="{{x.min}}"
@@ -17,8 +18,9 @@
         <br>
         {% endfor %}
         <br>
-        <label for="title">Input File</label>
-        <input type="file"
+        <label for="title" class="form-label">Input File</label>
+        <input class="form-control"
+               type="file"
                id="inputfile" name="inputfile">
         <br>
         <br>
