@@ -3,9 +3,25 @@
 {% block content %}
     <h1>{% block title %} Create a new rainbow gif {% endblock %}</h1>
     <form method="post" enctype="multipart/form-data">
-        <label for="title">Input</label>
+        {% for x in params %}
+        <label for="{{x.name}}">{{x.name}}</label>
+        <input type="range"
+               id="{{x.name}}"
+               name="{{x.name}}"
+               min="{{x.min}}"
+               max="{{x.max}}"
+          {% if x.name == 'blend_amount' %}
+               step="0.01"
+          {% endif %}
+               value="{{x.default}}">
+        <br>
+        {% endfor %}
+        <br>
+        <label for="title">Input File</label>
         <input type="file"
                id="inputfile" name="inputfile">
+        <br>
+        <br>
         <button type="submit">Submit</button>
     </form>
 {% endblock %}
