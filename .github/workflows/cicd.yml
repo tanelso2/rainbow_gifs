@@ -1,0 +1,17 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: tanelso2/deployment_scripts/actions/build_and_push_to_gcr@master
+      with:
+        repoName: rainbow_gifs
+        serviceAccount: ${{secrets.GCR_SERVICE_ACCOUNT}}
