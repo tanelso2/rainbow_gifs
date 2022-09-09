@@ -14,7 +14,7 @@
     <hr>
     <div class="content container">
         {% for message in get_flashed_messages() %}
-            <div class="alert">{{message}}</div>
+            <div class="flash">{{message}}</div>
         {% endfor %}
         {% block content %} {% endblock %}
     </div>

@@ -3,11 +3,10 @@ from rainbow import rainbowify
 import os
 import logging
 import random
+import secrets
 
 app = Flask(__name__)
-
-messages = [{'title': 'Message One',
-             'content': 'Message One Content'}]
+app.secret_key = secrets.token_urlsafe(32)
 
 params = [{'name': 'blend_amount',
            'type': float,

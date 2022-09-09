@@ -16,13 +16,21 @@ nav a {
     background-color: #ffd5de;
 }
 
+.flash {
+    padding: 20px;
+    margin: 5px;
+    color: #970020;
+    background-color: #ffd5de;
+}
+
 .inspiration {
     padding: 2px;
-    height: 64px;
-    width: 64px;
+    height: 32px;
+    width: 32px;
 }
 .example {
-    padding: 5px;
-    height: 128px;
-    width: 128px;
+    padding: 10px;
+    margin: 5px;
+    height: 100px;
+    width: 100px;
 }
