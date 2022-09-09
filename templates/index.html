@@ -1,8 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Home {% endblock %}</h1>
+    <h1>{% block title %} Examples: {% endblock %}</h1>
     <div>
-        <a href="{{url_for('create')}}">Get started!</a>
+        {% for x in examples %}
+        <img class="example input" src="{{x.in}}">
+        <img class="example" src="/static/images/right_arrow.png">
+        <img class="example output" src="{{x.out}}">
+        <br>
+        {% endfor %}
+        <br>
+        <br>
+        <h1>
+            <a href="{{url_for('create')}}">Get started!</a>
+        </h1>
+        <br>
+        <br>
+    </div>
+    <div>
+        <p>
+            Inspired by:
+            <img class="inspiration" src="/static/images/party_parrot.gif">
+            <img class="inspiration" src="/static/images/party_wizard.gif">
+        </p>
     </div>
 {% endblock %}
