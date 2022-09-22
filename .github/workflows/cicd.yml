@@ -11,7 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: tanelso2/deployment_scripts/actions/build_and_push_to_gcr@master
+    - uses: tanelso2/deployment_scripts/actions/build_image@main
+      with:
+        repoName: rainbow_gifs
+    - uses: tanelso2/deployment_scripts/actions/build_and_push_to_gcr@main
       with:
         repoName: rainbow_gifs
         serviceAccount: ${{secrets.GCR_SERVICE_ACCOUNT}}
+      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
