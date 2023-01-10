@@ -1,3 +1,5 @@
+ View online at https://rainbowgifs.com
+
 # Example usage
 ```bash
 ./rainbow.py examples/void.png \
