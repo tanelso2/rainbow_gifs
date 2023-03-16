@@ -1,12 +1,19 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
-from rainbow import rainbowify
-import os
+import prometheus_client
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import logging
+import os
 import random
 import secrets
+from metrics import gifs_posted, gifs_created
+from rainbow import rainbowify
+
 
 app = Flask(__name__)
 app.secret_key = secrets.token_urlsafe(32)
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': prometheus_client.make_wsgi_app()
+})
 
 params = [{'name': 'blend_amount',
            'type': float,
@@ -48,8 +55,6 @@ def get_examples():
                 if os.path.isfile(in_file) and os.path.isfile(out_file):
                     possible_examples.append({"in": in_file, "out": out_file})
     return possible_examples
-            
-
 
 @app.route('/')
 def index():
@@ -67,24 +72,25 @@ def create():
         inputfile = request.files['inputfile']
         logging.info(f'{inputfile=}')
         logging.info(f'{type(inputfile)=}')
-        print(f'{inputfile=}')
-        print(f'{type(inputfile)=}')
         blend_amount = float(request.form['blend_amount'])
         hue_rate = int(request.form['hue_rate'])
         duration = int(request.form['duration'])
-        print(f'{hue_rate=}')
-        print(f'{blend_amount=}')
-        print(f'{duration=}')
+        logging.info(f'{hue_rate=}')
+        logging.info(f'{blend_amount=}')
+        logging.info(f'{duration=}')
 
         if not inputfile:
             flash('FILE is required!')
         else:
+            gifs_posted.inc()
             id = random_name()
             output_path = path_for(id)
             # TODO: Some checks on the inputfile
             rainbowify(inputfile, output_file=output_path, blend_amount=blend_amount, hue_rate=hue_rate, duration=duration)
+            gifs_created.inc()
             return redirect(url_for('display', id=id))
-    return render_template('create.html', params=params)
+    else:
+        return render_template('create.html', params=params)
 
 @app.route('/display/<id>')
 def display(id):
