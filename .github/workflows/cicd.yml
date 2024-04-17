@@ -15,6 +15,7 @@ jobs:
       with:
         repoName: rainbowgifs
     - uses: tanelso2/deployment_scripts/actions/build_and_push_to_gcr@main
+      id: gcr
       with:
         repoName: rainbowgifs
         serviceAccount: ${{secrets.GCR_SERVICE_ACCOUNT}}
@@ -25,3 +26,4 @@ jobs:
         repoName: rainbowgifs 
         tcmKey: ${{secrets.TCM_KEY}}
         tcmAddr: tcm.thomasnelson.me
+        imageTag: ${{steps.gcr.outputs.tag}}
