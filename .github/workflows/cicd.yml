@@ -1,4 +1,7 @@
 name: Docker Image CI
+permissions:
+  id-token: write
+  contents: read
 
 on:
   push:
@@ -12,18 +15,19 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: tanelso2/deployment_scripts/actions/build_image@main
+      id: build
       with:
         repoName: rainbowgifs
-    - uses: tanelso2/deployment_scripts/actions/build_and_push_to_gcr@main
-      id: gcr
+    - uses: tanelso2/deployment_scripts/actions/push_to_ecr@main
+      id: ecr
       with:
         repoName: rainbowgifs
-        serviceAccount: ${{secrets.GCR_SERVICE_ACCOUNT}}
+        version: ${{steps.build.outputs.version}}
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     - uses: tanelso2/deployment_scripts/actions/update_tcm@main
       if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       with:
-        repoName: rainbowgifs 
+        repoName: rainbowgifs
         tcmKey: ${{secrets.TCM_KEY}}
         tcmAddr: tcm.thomasnelson.me
-        imageTag: ${{steps.gcr.outputs.tag}}
+        imageTag: ${{steps.ecr.outputs.tag}}
