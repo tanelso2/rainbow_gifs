@@ -16,4 +16,4 @@ EXPOSE 5000
 
 RUN mkdir -p static/images/output
 
-CMD flask run --host=0.0.0.0
+CMD gunicorn --bind 0.0.0.0:5000 --workers 2 app:app
